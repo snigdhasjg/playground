@@ -18,24 +18,24 @@ class Node(object):
         return self.__nextNode
 
     @dispatch(object)
-    def next_node(self, nextNode: Node) -> None:
-        self.__nextNode = nextNode
+    def next_node(self, next_node: Node) -> None:
+        self.__nextNode = next_node
 
     def __str__(self) -> str:
         return "Node({})".format(self.data)
 
 
 class LinkedList:
-    def __init__(self, initValue: list = None) -> None:
+    def __init__(self, init_value: list = None) -> None:
         """ A linked list is a linear collection of data elements whose order is not given by their physical placement
          in memory. Instead, each element points to the next. It is a data structure consisting of a collection of
           nodes which together represent a sequence.
-        :param initValue: If you want to initiate linked list with help of other list
+        :param init_value: If you want to initiate linked list with help of other list
         """
         self.__head: Node = None
         self.__size: int = 0
-        if initValue:
-            for each in initValue:
+        if init_value:
+            for each in init_value:
                 self.add_element(each)
 
     def add_element(self, value: Any) -> None:
