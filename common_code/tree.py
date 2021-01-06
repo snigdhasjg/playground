@@ -1,101 +1,72 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import List, Any
+from typing import List, Any, Callable
 
 
 class BinaryNode(object):
-
     def __init__(self, value, left=None, right=None) -> None:
         self.value = value
         self.left_children = left
         self.right_children = right
 
     def add_child(self, value) -> BinaryNode:
+        """ Add a child Node
+        :param value: value of child node
+        :return: the current node
+        """
         child = BinaryNode(value)
         self.__add_child(child)
         return self
 
-    def travel_bfs(self) -> List[List[Any]]:
+    def travel_bfs(self, reverse: bool = False, zigzag: bool = False, zigzag_reverse: bool = False) -> List[List[Any]]:
+        """ Travel the tree in BFS order
+
+        :param reverse: flat to indicate to show output in reverse order
+        :param zigzag: flat to indicate to show output in zigzag format [left -> right -> left]
+        :param zigzag_reverse: flat to indicate to show output in zigzag format in reverse [right -> left -> right]
+        this has priority over zigzag flag
+        :return: Array representing each level, and each level Array consists of all values in that level
+        """
         output = []
-        level_output = []
-        level_index = 0
 
-        queue = deque()
-        queue.append((0, self))
-        while len(queue) != 0:
-            index, node = queue.popleft()
-            if level_index != index:
-                level_index = index
-                output.append(level_output)
-                level_output = []
-            level_output.append(node.value)
+        def zigzag_reverse_identifier() -> Callable[[int], bool]:
+            if zigzag_reverse:
+                return lambda level: level % 2 != 0
+            else:
+                return lambda level: level % 2 == 0
 
-            if node.left_children:
-                queue.append((index + 1, node.left_children))
-            if node.right_children:
-                queue.append((index + 1, node.right_children))
+        zigzag_reverse_identifier_function: Callable[[int], bool] = zigzag_reverse_identifier()
 
-        output.append(level_output)
+        def __travel_each_level(queue: deque, level: int = 0):
+            if len(queue) == 0:
+                return
+            next_level = deque()
+            level_output = []
 
-        return output
-
-    def travel_bfs_reverse(self) -> List[List[Any]]:
-        output = []
-        queue = deque()
-
-        def __travel_each_level(level_idx, first_element: BinaryNode):
-            level_output = [first_element.value]
-
-            while True:
-                if first_element.left_children:
-                    queue.append((level_idx + 1, first_element.left_children))
-                if first_element.right_children:
-                    queue.append((level_idx + 1, first_element.right_children))
-
-                if len(queue) == 0:
-                    break
-                index, node = queue.popleft()
-
-                if index != level_idx:
-                    __travel_each_level(index, node)
-                    break
+            while len(queue) != 0:
+                node = queue.popleft()
+                if zigzag or zigzag_reverse:
+                    if zigzag_reverse_identifier_function(level):
+                        level_output.append(node.value)
+                    else:
+                        level_output.insert(0, node.value)
                 else:
                     level_output.append(node.value)
-                    first_element = node
 
-            output.append(level_output)
+                if node.left_children:
+                    next_level.append(node.left_children)
+                if node.right_children:
+                    next_level.append(node.right_children)
 
-        __travel_each_level(0, self)
-        return output
+            if reverse:
+                __travel_each_level(next_level, level + 1)
+                output.append(level_output)
+            else:
+                output.append(level_output)
+                __travel_each_level(next_level, level + 1)
 
-    def travel_bfs_zigzag(self) -> List[List[Any]]:
-        output = []
-
-        def __travel_each_level(stack: list, level: int = 0):
-            if len(stack) == 0:
-                return
-            next_level = []
-            level_output = []
-            while len(stack) != 0:
-                node = stack.pop()
-                level_output.append(node.value)
-
-                if level % 2 == 0:
-                    if node.left_children:
-                        next_level.append(node.left_children)
-                    if node.right_children:
-                        next_level.append(node.right_children)
-                else:
-                    if node.right_children:
-                        next_level.append(node.right_children)
-                    if node.left_children:
-                        next_level.append(node.left_children)
-
-            output.append(level_output)
-            __travel_each_level(next_level, level + 1)
-
-        __travel_each_level([self])
+        __travel_each_level(deque([self]))
         return output
 
     def __add_child(self, child) -> None:
