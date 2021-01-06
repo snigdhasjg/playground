@@ -60,11 +60,11 @@ class BinaryNode(object):
                     next_level.append(node.right_children)
 
             if reverse:
-                __travel_each_level(next_level, level + 1)
-                output.append(level_output)
+                output.insert(0, level_output)
             else:
                 output.append(level_output)
-                __travel_each_level(next_level, level + 1)
+
+            __travel_each_level(next_level, level + 1)
 
         __travel_each_level(deque([self]))
         return output
