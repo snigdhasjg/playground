@@ -151,13 +151,13 @@ class LinkedList:
     def __swap_set(self, start: Node, current: Node, prev: Node, no_of_element: int,
                    is_end_of_list: Callable[[Node], bool] = lambda node: node.next_node() is None) -> Node:
         if is_end_of_list(current) or no_of_element == 0:
-            temp = current.next_node()
+            _temp = current.next_node()
             if start is None:
                 self.__head = current
             else:
                 start.next_node(current)
             current.next_node(prev)
-            return temp
+            return _temp
         end = self.__swap_set(start, current.next_node(), current, no_of_element - 1, is_end_of_list)
         if prev is None:
             current.next_node(end)
