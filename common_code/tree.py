@@ -19,6 +19,14 @@ class BinaryNode(object):
         self.__add_child(child)
         return self
 
+    def add_left_child(self, value) -> BinaryNode:
+        self.left_children = BinaryNode(value)
+        return self
+
+    def add_right_child(self, value) -> BinaryNode:
+        self.right_children = BinaryNode(value)
+        return self
+
     def travel_bfs(self, reverse: bool = False, zigzag: bool = False, zigzag_reverse: bool = False) -> List[List[Any]]:
         """ Travel the tree in BFS order
 
@@ -68,6 +76,41 @@ class BinaryNode(object):
 
         __travel_each_level(deque([self]))
         return output
+
+    def find_path(self, given_sum: int) -> bool:
+        def __find_sum(current_node: BinaryNode, sum_left: int) -> bool:
+            if current_node is None:
+                return sum_left == 0
+
+            value = sum_left - current_node.value
+            if __find_sum(current_node.left_children, value):
+                print(current_node.value)
+                return True
+            if __find_sum(current_node.right_children, value):
+                print(current_node.value)
+                return True
+            return False
+
+        return __find_sum(self, given_sum)
+
+    def find_all_path(self, given_sum: int):
+        total = []
+
+        def __find_sum(current_node: BinaryNode, sum_left: int, depth_array):
+            if current_node is None:
+                return
+            value = sum_left - current_node.value
+            current_array = depth_array + [current_node.value]
+            if current_node.left_children is None and current_node.right_children is None:
+                if value == 0:
+                    total.append(current_array)
+                return
+            __find_sum(current_node.left_children, value, current_array)
+            __find_sum(current_node.right_children, value, current_array)
+
+        __find_sum(self, given_sum, [])
+        print(total)
+        return len(total)
 
     def __add_child(self, child) -> None:
         if child.value < self.value:
