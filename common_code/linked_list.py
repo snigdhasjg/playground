@@ -1,7 +1,8 @@
 from __future__ import annotations
-from multipledispatch import dispatch
 
-from typing import Callable, Any
+from typing import Callable, Any, Tuple
+
+from multipledispatch import dispatch
 
 
 class LinkedListException(Exception):
@@ -147,6 +148,21 @@ class LinkedList:
         start: Node = None
         while temp is not None:
             start, temp = temp, self.__swap_set(start, temp, None, k - 1)
+
+    def rotate(self, k: int) -> None:
+        self.__rotate(k, None, self.__head)
+
+    def __rotate(self, k: int, prev: Node, current: Node, depth: int = 1) -> Tuple[int, int, Node]:
+        if current is None:
+            return 1, depth - 1, None
+        reverse_depth, size, last_node = self.__rotate(k, current, current.next_node(), depth + 1)
+        if last_node is None:
+            last_node = current
+        if reverse_depth == k % size:
+            prev.next_node(None)
+            last_node.next_node(self.__head)
+            self.__head = current
+        return reverse_depth + 1, size, last_node
 
     def __swap_set(self, start: Node, current: Node, prev: Node, no_of_element: int,
                    is_end_of_list: Callable[[Node], bool] = lambda node: node.next_node() is None) -> Node:
