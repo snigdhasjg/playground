@@ -8,6 +8,7 @@ def read_input():
         if _line == '':
             _all_scanner_scan.append(_temp_scanner_scan)
             continue
+        _line += ',0'
         _temp_scanner_scan.append(tuple(map(lambda _x: int(_x), _line.split(','))))
     if _temp_scanner_scan and len(_temp_scanner_scan) is not 0:
         _all_scanner_scan.append(_temp_scanner_scan)
@@ -17,34 +18,34 @@ def read_input():
 
 rotation_map = {
     0: lambda v: v,
-    1: lambda v: (v[0], -v[2], v[1]),
-    2: lambda v: (v[0], -v[1], -v[2]),
-    3: lambda v: (v[0], v[2], -v[1]),
+    1: lambda v: (v[0], -v[2], v[1], v[3]),
+    2: lambda v: (v[0], -v[1], -v[2], v[3]),
+    3: lambda v: (v[0], v[2], -v[1], v[3]),
 
-    4: lambda v: (-v[1], v[0], v[2]),
-    5: lambda v: (v[2], v[0], v[1]),
-    6: lambda v: (v[1], v[0], -v[2]),
-    7: lambda v: (-v[2], v[0], -v[1]),
+    4: lambda v: (-v[1], v[0], v[2], v[3]),
+    5: lambda v: (v[2], v[0], v[1], v[3]),
+    6: lambda v: (v[1], v[0], -v[2], v[3]),
+    7: lambda v: (-v[2], v[0], -v[1], v[3]),
 
-    8: lambda v: (-v[0], -v[1], v[2]),
-    9: lambda v: (-v[0], -v[2], -v[1]),
-    10: lambda v: (-v[0], v[1], -v[2]),
-    11: lambda v: (-v[0], v[2], v[1]),
+    8: lambda v: (-v[0], -v[1], v[2], v[3]),
+    9: lambda v: (-v[0], -v[2], -v[1], v[3]),
+    10: lambda v: (-v[0], v[1], -v[2], v[3]),
+    11: lambda v: (-v[0], v[2], v[1], v[3]),
 
-    12: lambda v: (v[1], -v[0], v[2]),
-    13: lambda v: (v[2], -v[0], -v[1]),
-    14: lambda v: (-v[1], -v[0], -v[2]),
-    15: lambda v: (-v[2], -v[0], v[1]),
+    12: lambda v: (v[1], -v[0], v[2], v[3]),
+    13: lambda v: (v[2], -v[0], -v[1], v[3]),
+    14: lambda v: (-v[1], -v[0], -v[2], v[3]),
+    15: lambda v: (-v[2], -v[0], v[1], v[3]),
 
-    16: lambda v: (-v[2], v[1], v[0]),
-    17: lambda v: (v[1], v[2], v[0]),
-    18: lambda v: (v[2], -v[1], v[0]),
-    19: lambda v: (-v[1], -v[2], v[0]),
+    16: lambda v: (-v[2], v[1], v[0], v[3]),
+    17: lambda v: (v[1], v[2], v[0], v[3]),
+    18: lambda v: (v[2], -v[1], v[0], v[3]),
+    19: lambda v: (-v[1], -v[2], v[0], v[3]),
 
-    20: lambda v: (-v[2], -v[1], -v[0]),
-    21: lambda v: (-v[1], v[2], -v[0]),
-    22: lambda v: (v[2], v[1], -v[0]),
-    23: lambda v: (v[1], -v[2], -v[0])
+    20: lambda v: (-v[2], -v[1], -v[0], v[3]),
+    21: lambda v: (-v[1], v[2], -v[0], v[3]),
+    22: lambda v: (v[2], v[1], -v[0], v[3]),
+    23: lambda v: (v[1], -v[2], -v[0], v[3]),
 }
 
 
@@ -83,35 +84,35 @@ def overlap_diff(_base_scanner, _new_scanner):
         selected = _new_scanner[i]
         for j in range(_base_scanner_length):
             selected_base = _base_scanner[j]
+            if selected_base[3] == 1:
+                continue
             diff_selected = (selected_base[0] - selected[0],
                              selected_base[1] - selected[1],
-                             selected_base[2] - selected[2])
+                             selected_base[2] - selected[2], 1)
             match_count = 1
-            inner_loop_count = 1
             all_shifted = []
             for k in range(_new_scanner_length):
                 if i == k:
                     continue
-                inner_loop_count += 1
                 other = _new_scanner[k]
                 shifted = (other[0] + diff_selected[0],
                            other[1] + diff_selected[1],
-                           other[2] + diff_selected[2])
+                           other[2] + diff_selected[2], other[3])
                 if is_present(indexed_scanner_dict, shifted):
                     match_count += 1
                 else:
                     all_shifted.append(shifted)
-                # if _base_scanner_length - inner_loop_count + 1 < 12 - match_count:  # total 25 - 19, 12 - match 5
-                #     break
             if match_count >= 12:
-                return all_shifted
+                return all_shifted, diff_selected
 
 
 def overlap(_base_scanner, _new_scanner):
-    all_shifted = overlap_diff(_base_scanner, _new_scanner)
-    if not all_shifted:
+    temp = overlap_diff(_base_scanner, _new_scanner)
+    if not temp:
         return False
+    all_shifted, diff_selected = temp[0], temp[1]
     [_base_scanner.append(_each) for _each in all_shifted]
+    _base_scanner.append(diff_selected)
     return True
 
 
@@ -123,10 +124,6 @@ def merge_if_possible(_base_scanner, _new_scanner):
 
 
 def all_possible_rotation(_all_scanner_scan: list):
-    # base_scanner = _all_scanner_scan[0]
-    # for _each in _all_scanner_scan[1:]:
-    #     merge_if_possible(base_scanner, _each)
-    # return base_scanner
     i, j = 0, 1
     while len(_all_scanner_scan) is not 1:
         current_length = len(_all_scanner_scan)
@@ -137,6 +134,8 @@ def all_possible_rotation(_all_scanner_scan: list):
             i = i % current_length
         if j >= current_length:
             j = j % current_length
+        if i > j:
+            i, j = j, i
         print('Size', current_length)
         print(i, j)
         f_scanner = _all_scanner_scan[i]
@@ -150,14 +149,29 @@ def all_possible_rotation(_all_scanner_scan: list):
     return _all_scanner_scan[0]
 
 
+def manhattan_distance(pos1, pos2):
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1]) + abs(pos1[2] - pos2[2])
+
+
+def find_max_manhattan_distance(_all_scanner):
+    scanner_pos = _all_scanner
+    no_of_scanner = len(scanner_pos)
+    max_distance = -1
+    for i in range(no_of_scanner):
+        for j in range(no_of_scanner):
+            if i == j:
+                continue
+            max_distance = max(max_distance, manhattan_distance(scanner_pos[i], scanner_pos[j]))
+    return max_distance
+
+
 if __name__ == '__main__':
     all_scanner_scan = read_input()
     rotation = all_possible_rotation(all_scanner_scan)
-    # rotation.sort(key=lambda x: x[0])
-    # for each in rotation:
-    #     print('{},{},{}'.format(each[0], each[1], each[2]))
-    print(len(rotation))
+    all_scanner = list(filter(lambda x: x[3] == 1, rotation))
+    all_scanner.append((0, 0, 0, 1))
 
-# if __name__ == '__main__':
-#     temp = create_dict([[1, 2, 3], [1, 4, 5], [1, 2, 6]])
-#     pass
+    print(find_max_manhattan_distance(all_scanner))
+    print(all_scanner)
+    print(len(rotation) - len(all_scanner))
+

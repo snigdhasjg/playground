@@ -1,5 +1,5 @@
-import math
 import itertools
+import math
 
 
 class Node:
@@ -122,22 +122,20 @@ class Node:
             return self
         return self.right_child.right_most_link()
 
+    def __add__(self, other):
+        parent_node: Node = create_parent_node(self, other)
+        right_link_of_left_node: Node = self.right_most_link()
+        left_link_of_right_node: Node = other.left_most_link()
 
-def add_two_nodes(left_node: Node, right_node: Node):
-    parent_node: Node = create_parent_node(left_node, right_node)
+        right_link_of_left_node.right_link = left_link_of_right_node
+        left_link_of_right_node.left_link = right_link_of_left_node
 
-    right_link_of_left_node: Node = left_node.right_most_link()
-    left_link_of_right_node: Node = right_node.left_most_link()
+        while parent_node.explode() or parent_node.split():
+            # print(top_most_node)
+            # print(top_most_node.str_linked_list())
+            pass
 
-    right_link_of_left_node.right_link = left_link_of_right_node
-    left_link_of_right_node.left_link = right_link_of_left_node
-
-    while parent_node.explode() or parent_node.split():
-        # print(top_most_node)
-        # print(top_most_node.str_linked_list())
-        pass
-
-    return parent_node
+        return parent_node
 
 
 def create_parent_node(first_element: Node, second_element: Node):
@@ -191,7 +189,7 @@ def add_inputs_part_1():
     inputs = process_input_part1()
     temp_node = inputs[0]
     for each_node in inputs[1:]:
-        temp_node = add_two_nodes(temp_node, each_node)
+        temp_node += each_node
 
     return str(temp_node), temp_node.magnitude()
 
@@ -206,7 +204,7 @@ def add_inputs_part_2():
         first_node = process_each_line(_input[_x])
         second_node = process_each_line(_input[_y])
 
-        added_node = add_two_nodes(first_node, second_node)
+        added_node = first_node + second_node
         return added_node, added_node.magnitude()
 
     for x, y in combination_index:
