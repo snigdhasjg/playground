@@ -106,4 +106,4 @@ def iterate_print(image_algo: ImageAlgo, times):
 
 if __name__ == '__main__':
     algoWithImage = take_input()
-    [iterate_print(algoWithImage, i) for i in range(1, 51)]
+    [iterate_print(algoWithImage, i) for i in range(1, 3)]
