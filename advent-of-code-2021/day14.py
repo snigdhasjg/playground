@@ -82,8 +82,8 @@ class Counter:
         _add_counter = Counter()
         for key in self.count:
             _add_counter.take_count(key, self.count[key])
-        for key in other.count:
-            _add_counter.take_count(key, other.count[key])
+        for key in other.add_item_count:
+            _add_counter.take_count(key, other.add_item_count[key])
 
         return _add_counter
 
