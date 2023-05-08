@@ -1,6 +1,3 @@
-unsorted = [-3, 0, 1, 2, -1, 1, -2]
-
-
 def find_triplet(nums: list):
     if len(nums) < 3 or min(nums) > 0 or max(nums) < 0:
         return []
@@ -43,4 +40,5 @@ def find_triplet(nums: list):
 
 
 if __name__ == '__main__':
+    unsorted = [-3, 0, 1, 2, -1, 1, -2]
     print(find_triplet(unsorted))

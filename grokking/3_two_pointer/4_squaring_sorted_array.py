@@ -1,12 +1,10 @@
 def squaring_in_order(nums: list):
-    length = len(nums)
-    output = [None] * length
+    output = []
     left_pointer = 0
-    right_pointer = length - 1
-    out_index = length - 1
+    right_pointer = len(nums) - 1
     while True:
         if left_pointer == right_pointer:
-            output[out_index] = nums[left_pointer] ** 2
+            output.insert(0, nums[left_pointer] ** 2)
             break
         if left_pointer > right_pointer:
             break
@@ -14,12 +12,10 @@ def squaring_in_order(nums: list):
         right_square = nums[right_pointer] ** 2
         if left_square > right_square:
             left_pointer, right_pointer = left_pointer + 1, right_pointer
-            output[out_index] = left_square
-            out_index -= 1
+            output.insert(0, left_square)
         else:
             left_pointer, right_pointer = left_pointer, right_pointer - 1
-            output[out_index] = right_square
-            out_index -= 1
+            output.insert(0, right_square)
 
     return output
 
