@@ -2,5 +2,6 @@
 *.pyc
 *.csv
 .DS_Store
+*.pickle
 
 __pycache__

@@ -1,4 +1,7 @@
 import logging
+import pickle
+from datetime import date
+import os
 
 import wbgapi as wb
 from pycountry import currencies, countries
@@ -8,6 +11,11 @@ BASIC_FORMAT = "%(name)s [%(levelname)s] %(message)s"
 logging.basicConfig(format=BASIC_FORMAT, level='INFO')
 log = logging.getLogger(__name__)
 
+today_date = date.today()
+today_date_formatted = today_date.isoformat()
+this_year = today_date.year
+script_dir = os.path.dirname(__file__)
+
 
 def price_level_ratio_of_ppp(from_country, to_country):
     """
@@ -16,9 +24,24 @@ def price_level_ratio_of_ppp(from_country, to_country):
     https://wdi.worldbank.org/table/4.16
     """
     log.info("Fetching PPP ratio of %s(%s)", to_country.name, to_country.alpha_3)
-    ppp_to_country = wb.data.get(['PA.NUS.PPPC.RF'], to_country.alpha_3)['value']
+    country_cache_file_path = os.path.join(script_dir, 'cache/ppp')
+    if not os.path.isdir(country_cache_file_path):
+        os.mkdir(country_cache_file_path)
+    to_country_cache_file = os.path.join(country_cache_file_path, f'{to_country.alpha_3}_{this_year}.pickle')
+    if os.path.isfile(to_country_cache_file):
+        ppp_to_country = pickle.load(open(to_country_cache_file, 'rb'))
+    else:
+        ppp_to_country = wb.data.get(['PA.NUS.PPPC.RF'], to_country.alpha_3)['value']
+        pickle.dump(ppp_to_country, open(to_country_cache_file, 'wb+'))
+
     log.info("Fetching PPP ratio of %s(%s)", from_country.name, from_country.alpha_3)
-    ppp_from_country = wb.data.get(['PA.NUS.PPPC.RF'], from_country.alpha_3)['value']
+    from_country_cache_file = os.path.join(country_cache_file_path, f'{from_country.alpha_3}_{this_year}.pickle')
+    if os.path.isfile(from_country_cache_file):
+        ppp_from_country = pickle.load(open(from_country_cache_file, 'rb'))
+    else:
+        ppp_from_country = wb.data.get(['PA.NUS.PPPC.RF'], from_country.alpha_3)['value']
+        pickle.dump(ppp_from_country, open(from_country_cache_file, 'wb+'))
+
     ratio = ppp_to_country / ppp_from_country
     log.info("PPP ratio of %s & %s: %s", to_country.name, from_country.name, ratio)
     return ratio
@@ -30,9 +53,18 @@ def convert_amount(from_currency, amount, to_currency):
 
     This method take USA as base unit
     """
-    response = request('GET', 'https://api.currencyfreaks.com/latest?apikey=53e0139d6ff040f08e31c7a5b7ca10f9').json()
-    rates = response['rates']
     log.info("Fetching currency ratio of %s(%s)", to_currency.name, to_currency.alpha_3)
+    currency_cache_file_path = os.path.join(script_dir, 'cache/currency')
+    if not os.path.isdir(currency_cache_file_path):
+        os.mkdir(currency_cache_file_path)
+    currency_cache_file = os.path.join(currency_cache_file_path, f'{today_date_formatted}.pickle')
+    if os.path.isfile(currency_cache_file):
+        rates = pickle.load(open(currency_cache_file, 'rb'))
+    else:
+        response = request('GET', 'https://api.currencyfreaks.com/latest?apikey=53e0139d6ff040f08e31c7a5b7ca10f9').json()
+        rates = response['rates']
+        pickle.dump(rates, open(currency_cache_file, 'wb+'))
+
     to_currency_rate = float(rates[to_currency.alpha_3])
     log.info("Fetching currency ratio of %s(%s)", from_currency.name, from_currency.alpha_3)
     from_currency_rate = float(rates[from_currency.alpha_3])
@@ -78,16 +110,19 @@ def convert(from_country_fuzzy_query: str | tuple | list, amount: float, to_coun
 
     ratio = price_level_ratio_of_ppp(from_country, to_country)
 
+    direct_conversation = convert_amount(from_currency, amount, to_currency)
     final_amount = amount * ratio
     converted_final_amount = convert_amount(from_currency, final_amount, to_currency)
 
     print(string_formatted(from_country, from_currency, amount))
     print("is")
     print(string_formatted(to_country, to_currency, converted_final_amount))
+    print("Also direct conversation")
+    print(string_formatted(to_country, to_currency, direct_conversation))
 
 
 def main():
-    convert('India', 3000000, ('Germany', 'Euro'))
+    convert('India', 3000000, 'USA')
 
 
 if __name__ == '__main__':
