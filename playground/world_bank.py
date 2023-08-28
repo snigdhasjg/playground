@@ -23,24 +23,22 @@ def price_level_ratio_of_ppp(from_country, to_country):
     conversion factor to market exchange rate.
     https://wdi.worldbank.org/table/4.16
     """
-    log.info("Fetching PPP ratio of %s(%s)", to_country.name, to_country.alpha_3)
     country_cache_file_path = os.path.join(script_dir, 'cache/ppp')
     if not os.path.isdir(country_cache_file_path):
         os.mkdir(country_cache_file_path)
-    to_country_cache_file = os.path.join(country_cache_file_path, f'{to_country.alpha_3}_{this_year}.pickle')
-    if os.path.isfile(to_country_cache_file):
-        ppp_to_country = pickle.load(open(to_country_cache_file, 'rb'))
-    else:
-        ppp_to_country = wb.data.get(['PA.NUS.PPPC.RF'], to_country.alpha_3)['value']
-        pickle.dump(ppp_to_country, open(to_country_cache_file, 'wb+'))
 
-    log.info("Fetching PPP ratio of %s(%s)", from_country.name, from_country.alpha_3)
-    from_country_cache_file = os.path.join(country_cache_file_path, f'{from_country.alpha_3}_{this_year}.pickle')
-    if os.path.isfile(from_country_cache_file):
-        ppp_from_country = pickle.load(open(from_country_cache_file, 'rb'))
-    else:
-        ppp_from_country = wb.data.get(['PA.NUS.PPPC.RF'], from_country.alpha_3)['value']
-        pickle.dump(ppp_from_country, open(from_country_cache_file, 'wb+'))
+    def ppp_country(_country):
+        log.info("Fetching PPP ratio of %s(%s)", _country.name, _country.alpha_3)
+        to_country_cache_file = os.path.join(country_cache_file_path, f'{_country.alpha_3}_{this_year}.pickle')
+        if os.path.isfile(to_country_cache_file):
+            _ppp_country = pickle.load(open(to_country_cache_file, 'rb'))
+        else:
+            _ppp_country = wb.data.get(['PA.NUS.PPPC.RF'], _country.alpha_3)['value']
+            pickle.dump(_ppp_country, open(to_country_cache_file, 'wb+'))
+        return _ppp_country
+
+    ppp_to_country = ppp_country(to_country)
+    ppp_from_country = ppp_country(from_country)
 
     ratio = ppp_to_country / ppp_from_country
     log.info("PPP ratio of %s & %s: %s", to_country.name, from_country.name, ratio)
@@ -61,7 +59,8 @@ def convert_amount(from_currency, amount, to_currency):
     if os.path.isfile(currency_cache_file):
         rates = pickle.load(open(currency_cache_file, 'rb'))
     else:
-        response = request('GET', 'https://api.currencyfreaks.com/latest?apikey=53e0139d6ff040f08e31c7a5b7ca10f9').json()
+        api_url = 'https://api.currencyfreaks.com/latest?apikey=53e0139d6ff040f08e31c7a5b7ca10f9'
+        response = request('GET', api_url).json()
         rates = response['rates']
         pickle.dump(rates, open(currency_cache_file, 'wb+'))
 
@@ -122,7 +121,7 @@ def convert(from_country_fuzzy_query: str | tuple | list, amount: float, to_coun
 
 
 def main():
-    convert('India', 3000000, 'USA')
+    convert('USA', 145000, 'India')
 
 
 if __name__ == '__main__':
