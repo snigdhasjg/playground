@@ -1,4 +1,5 @@
-FROM ubuntu:latest
+ARG UBUNTU_VERSION=23.04
+FROM ubuntu:${UBUNTU_VERSION}
 
 RUN apt update
 RUN apt install -y zsh

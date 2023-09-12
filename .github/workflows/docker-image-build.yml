@@ -1,0 +1,73 @@
+name: Docker Image Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - docker-images/**
+      - .github/workflows/docker-image-build.yml
+
+concurrency: docker_image_build_${{ github.ref }}
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    name: Docker Build and Push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - id: metadata
+        name: Compute Metadata
+        run: |
+          echo "current_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+          echo "git_tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          echo "::notice git_tag=$(git describe --tags --abbrev=0)"
+
+      - id: build_push
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: docker-images/zshbuntu/
+          no-cache: true
+          push: true
+          tags: macabrequinox/zshbuntu:latest,macabrequinox/zshbuntu:${{ steps.metadata.outputs.git_tag }}
+          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          build-args: |
+            UBUNTU_VERSION=${{ steps.metadata.outputs.git_tag }}
+          labels: |
+            org.opencontainers.image.title=zshbuntu
+            org.opencontainers.image.url=${{ github.repositoryUrl }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.metadata.outputs.git_tag }}
+            org.opencontainers.image.created=${{ steps.metadata.outputs.current_date }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Summary
+        run: |
+          {
+            echo -e "Image: zshbuntu:${{ steps.metadata.outputs.git_tag }}\n"
+            echo '<details>'
+            echo '<summary>Metadata</summary>'
+            echo -e '\n```json'
+            echo -e "${{ steps.build_push.outputs.metadata }}"
+            echo -e '```'
+            echo '</details>'
+            echo -e '\n'
+          } >> $GITHUB_STEP_SUMMARY
