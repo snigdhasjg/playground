@@ -48,7 +48,7 @@ jobs:
           no-cache: true
           push: true
           tags: macabrequinox/zshbuntu:latest,macabrequinox/zshbuntu:${{ steps.metadata.outputs.git_tag }}
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          platforms: linux/amd64,linux/arm64/v8
           build-args: |
             UBUNTU_VERSION=${{ steps.metadata.outputs.git_tag }}
           labels: |
@@ -65,7 +65,7 @@ jobs:
             echo -e "Image: zshbuntu:${{ steps.metadata.outputs.git_tag }}\n"
             echo '<details>'
             echo '<summary>Metadata</summary>'
-            echo -e '\n```json'
+            echo -e '\n```'
             echo -e "${{ steps.build_push.outputs.metadata }}"
             echo -e '```'
             echo '</details>'
