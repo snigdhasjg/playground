@@ -6,8 +6,9 @@ on:
     branches:
       - main
     paths:
-      - docker-images/**
-      - .github/workflows/docker-image-build.yml
+      - "docker-images/**"
+      - "!docker-images/**/README.md"
+      - ".github/workflows/docker-image-build.yml"
 
 concurrency: docker_image_build_${{ github.ref }}
 
@@ -38,10 +39,9 @@ jobs:
         run: |
           echo "current_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
           echo "git_tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
-          echo "::notice git_tag=$(git describe --tags --abbrev=0)"
 
-      - id: build_push
-        name: Build and push
+      - id: zshbuntu
+        name: Build zshbuntu
         uses: docker/build-push-action@v5
         with:
           context: docker-images/zshbuntu/
@@ -54,7 +54,6 @@ jobs:
           labels: |
             org.opencontainers.image.title=zshbuntu
             org.opencontainers.image.url=${{ github.repositoryUrl }}
-            org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.version=${{ steps.metadata.outputs.git_tag }}
             org.opencontainers.image.created=${{ steps.metadata.outputs.current_date }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -66,7 +65,7 @@ jobs:
             echo '<details>'
             echo '<summary>Metadata</summary>'
             echo -e '\n```'
-            echo -e "${{ steps.build_push.outputs.metadata }}"
+            echo -e "${{ steps.zshbuntu.outputs.metadata }}"
             echo -e '```'
             echo '</details>'
             echo -e '\n'
