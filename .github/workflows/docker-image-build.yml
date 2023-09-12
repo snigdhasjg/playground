@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - "docker-images/**"
-      - "!docker-images/**/README.md"
+      - "!docker-images/**/docs/**"
       - ".github/workflows/docker-image-build.yml"
 
 concurrency: docker_image_build_${{ github.ref }}

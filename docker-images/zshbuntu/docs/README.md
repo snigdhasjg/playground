@@ -4,6 +4,8 @@ Discover a world of command-line sophistication with our ZSHbuntu Docker image. 
 
 Whether you're a developer, system administrator, or terminal enthusiast, ZSHbuntu empowers you with a captivating, efficient, and fun command-line experience. Download now and unlock the full potential of your Ubuntu-based containers.
 
+<img src="https://raw.githubusercontent.com/snigdhasjg/playground/main/docker-images/zshbuntu/docs/terminal.png" width="512" alt="Terminal Example">
+
 ## Key Features:
 
 - Ubuntu base with [Zsh](https://en.wikipedia.org/wiki/Z_shell) magic.
@@ -18,24 +20,27 @@ zsh, sudo, systemd, vim, iputils-ping, curl, git, tig
 
 ## How to Use ZSHbuntu
 
-### Create a Docker Volume:
-- Create a Docker volume named "zshbuntu-sandbox" by running the following command:
-```shell
-docker volume create zshbuntu-sandbox
-```
-- This volume will be used to store and reuse your configuration and setups.
-
 ### Run the ZSHbuntu Docker Sandbox:
-- To run the Docker image with the previously created volume mounted to `/home/sandbox` for the user **"sandbox"**, use the following command:
+- To run the Docker image with the previously created volume mounted to `/home/sandbox` for the user `sandbox`, use the following command:
 ```shell
 docker run --name sandbox -v zshbuntu-sandbox:/home/sandbox --rm -it macabrequinox/zshbuntu:23.04
 ```
+- Along with running the container, this command creates a docker volume named `zshbuntu-sandbox`.
 - This command starts the ZSHbuntu Docker container, providing you with a secure and permission-free environment to run commands and experiment.
+- Once you exit, it automatically deletes the container instance.
 
-Now you're ready to enjoy your ZSHbuntu Docker Sandbox, where you can safely execute commands without worrying about permissions or security issues. Feel free to customize your environment and configurations within the sandbox, and any changes will be stored in the "zshbuntu-sandbox" volume for future use.
+Now you're ready to enjoy your ZSHbuntu Docker Sandbox, where you can safely execute commands without worrying about permissions or security issues. 
+Feel free to customize your environment and configurations within the sandbox, and any changes on home directory will be stored in the `zshbuntu-sandbox` volume for future use.
+
+### To Have a Fresh Start Again:
+- reset all settings just delete the `zshbuntu-sandbox` volume by running the following command:
+```shell
+docker volume rm zshbuntu-sandbox
+```
+- This volume was storing your configuration and setups of docker image's home directory.
 
 ## Contribute
-On [github](https://github.com/snigdhasjg/playground/tree/main/docker-images/zshbuntu)
+On [GitHub](https://github.com/snigdhasjg/playground/tree/main/docker-images/zshbuntu) by editing the [Dockerfile](https://github.com/snigdhasjg/playground/tree/main/docker-images/zshbuntu/Dockerfile)
 
 ---
 Tags: #Ubuntu #Zsh #OhMyZsh #Powerlevel10k #SyntaxHighlighting #AutoSuggestions #DockerImage #CommandLine #DeveloperTools #Productivity

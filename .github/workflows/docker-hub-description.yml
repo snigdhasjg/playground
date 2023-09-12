@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - "docker-images/**/README.md"
+      - "docker-images/**/docs/**"
       - ".github/workflows/docker-hub-description.yml"
 
 jobs:
@@ -26,4 +26,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: macabrequinox/zshbuntu
           short-description: "Your Ultimate Ubuntu Image with Zsh Magic!"
-          readme-filepath: "./docker-images/zshbuntu/README.md"
+          readme-filepath: "./docker-images/zshbuntu/docs/README.md"
