@@ -1,6 +1,6 @@
 import textwrap
 
-from day1 import (
+from day2 import (
     DAY,
     DEVELOPMENT_PHASE,
     PART_1_ENABLE, PART_2_ENABLE,

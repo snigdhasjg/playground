@@ -4,7 +4,7 @@ LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.CRITICAL)
 DAY = 0
 DEVELOPMENT_PHASE = True
-PART_1_ENABLE = False
+PART_1_ENABLE = True
 PART_2_ENABLE = False
 
 
