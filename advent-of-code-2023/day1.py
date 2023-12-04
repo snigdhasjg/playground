@@ -1,7 +1,7 @@
 import logging
 
 LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.CRITICAL)
+LOG_LEVEL = logging.CRITICAL
 DAY = 1
 DEVELOPMENT_PHASE = False
 PART_1_ENABLE = True

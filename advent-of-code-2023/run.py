@@ -1,12 +1,15 @@
+import logging
 import textwrap
 
-from day2 import (
+from day3 import (
+    LOG_LEVEL,
     DAY,
     DEVELOPMENT_PHASE,
     PART_1_ENABLE, PART_2_ENABLE,
     part1_example, part2_example,
     part1, part2
 )
+logging.basicConfig(level=LOG_LEVEL, format='%(message)s')
 
 
 def get_data():

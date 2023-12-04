@@ -3,7 +3,7 @@ import re
 from functools import reduce
 
 LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.CRITICAL)
+LOG_LEVEL = logging.CRITICAL
 DAY = 2
 DEVELOPMENT_PHASE = False
 PART_1_ENABLE = True
