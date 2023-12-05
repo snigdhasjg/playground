@@ -6,7 +6,7 @@ LOG = logging.getLogger(__name__)
 LOG_LEVEL = logging.CRITICAL
 DAY = 3
 DEVELOPMENT_PHASE = False
-PART_1_ENABLE = False
+PART_1_ENABLE = True
 PART_2_ENABLE = True
 
 
