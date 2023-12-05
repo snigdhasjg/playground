@@ -1,7 +1,7 @@
 import logging
 
 LOG = logging.getLogger(__name__)
-LOG_LEVEL = logging.CRITICAL
+LOG_LEVEL = logging.DEBUG
 DAY = 0
 DEVELOPMENT_PHASE = True
 PART_1_ENABLE = True
