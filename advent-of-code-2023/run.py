@@ -1,6 +1,5 @@
 import logging
 import textwrap
-from datetime import datetime
 
 from day5 import (
     LOG_LEVEL,
@@ -24,27 +23,17 @@ def get_data():
 
 
 def run_part1(raw_input):
-    start_time = datetime.now()
     print('Part 1:')
     print('\tExample: ', part1(textwrap.dedent(part1_example())))
-    example_end_time = datetime.now()
-    LOG.info(f'Part 1 Example took: {example_end_time - start_time}')
     if raw_input:
         print('\tData: ', part1(raw_input))
-        data_end_time = datetime.now()
-        LOG.info(f'Part 1 Data took: {data_end_time - example_end_time}')
 
 
 def run_part2(raw_input):
-    start_time = datetime.now()
     print('Part 2:')
     print('\tExample: ', part2(textwrap.dedent(part2_example())))
-    example_end_time = datetime.now()
-    LOG.info(f'Part 1 Example took: {example_end_time - start_time}')
     if raw_input:
         print('\tData: ', part2(raw_input))
-        data_end_time = datetime.now()
-        LOG.info(f'Part 1 Data took: {data_end_time - example_end_time}')
 
 
 def main():
