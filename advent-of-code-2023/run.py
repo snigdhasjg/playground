@@ -1,7 +1,7 @@
 import logging
 import textwrap
 
-from day5 import (
+from day6 import (
     LOG_LEVEL,
     DAY,
     DEVELOPMENT_PHASE,
