@@ -15,7 +15,7 @@ def part1_example():
         input"""
 
 
-def part1(raw_input):
+def part1(raw_input: str):
     pass
 
 
@@ -26,5 +26,5 @@ def part2_example():
         input"""
 
 
-def part2(raw_input):
+def part2(raw_input: str):
     pass
