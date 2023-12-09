@@ -1,4 +1,5 @@
 import logging
+import math
 
 LOG = logging.getLogger(__name__)
 LOG_LEVEL = logging.DEBUG
@@ -85,31 +86,28 @@ def part2_example():
 
 def part2(raw_input):
     instructions, routes = parse_input(raw_input)
+    LOG.debug(f'Total no of instruction: {len(instructions)}')
 
     current_route_nodes = [v for k, v in routes.items() if k.endswith('A')]
+    LOG.debug(f'Node starts with A: {list(map(lambda x: x.node, current_route_nodes))}')
 
-    LOG.debug(f'All nodes ends with A {current_route_nodes}')
-    index = 0
-    count = 0
+    def _count_to_each_z(route: Route):
+        index = 0
+        count = 0
+        while True:
+            current_instruction = instructions[index]
+            next_node = route.next(current_instruction)
+            route = routes[next_node]
+            count += 1
 
-    def _does_node_ends_with_z(route_nodes):
-        for route_node in route_nodes:
-            if not route_node.node.endswith('Z'):
-                return False
-        return True
+            if next_node.endswith('Z'):
+                break
 
-    while True:
-        current_instruction = instructions[index]
-        next_route_nodes = list(map(lambda x: routes[x.next(current_instruction)], current_route_nodes))
-        current_route_nodes = next_route_nodes
-        count += 1
-        LOG.debug(f'Next nodes {current_route_nodes}')
+            index += 1
+            if index == len(instructions):
+                index = 0
 
-        if _does_node_ends_with_z(next_route_nodes):
-            break
+        return count
 
-        index += 1
-        if index == len(instructions):
-            index = 0
-
-    return count
+    individual_node_count = list(map(_count_to_each_z, current_route_nodes))
+    return math.lcm(*individual_node_count)
