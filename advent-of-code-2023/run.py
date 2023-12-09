@@ -1,5 +1,6 @@
 import logging
 import textwrap
+import os
 
 from day8 import (
     LOG_LEVEL,
@@ -17,6 +18,11 @@ LOG = logging.getLogger(__name__)
 def get_data():
     if DEVELOPMENT_PHASE:
         return None
+
+    aocd_dir = os.path.join(os.path.dirname(__file__), '.aocd_config')
+    if not os.path.isdir(aocd_dir):
+        os.mkdir(aocd_dir)
+    os.environ['AOCD_DIR'] = aocd_dir
 
     import aocd
     return aocd.get_data(day=DAY, year=2023)
