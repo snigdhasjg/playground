@@ -4,7 +4,7 @@ import math
 LOG = logging.getLogger(__name__)
 LOG_LEVEL = logging.DEBUG
 DAY = 10
-DEVELOPMENT_PHASE = True
+DEVELOPMENT_PHASE = False
 PART_1_ENABLE = False
 PART_2_ENABLE = True
 
@@ -29,12 +29,6 @@ class Tile:
 
     def is_starting(self):
         return self.value == 'S'
-
-    def is_corner(self):
-        return self.value in ['F', 'L', 'J', '7']
-
-    def is_horizontal_line(self):
-        return self.value == '-'
 
     def update_distance(self, distance):
         if distance < self.distance:
@@ -164,53 +158,61 @@ def process(raw_input):
 
 def part2_example():
     return """\
-        .F----7F7F7F7F-7....
-        .|F--7||||||||FJ....
-        .||.FJ||||||||L7....
-        FJL7L7LJLJ||LJ.L-7..
-        L--J.L7...LJS7F-7L7.
-        ....F-J..F7FJ|L7L7L7
-        ....L7.F7||L7|.L7L7|
-        .....|FJLJ|FJ|F7|.LJ
-        ....FJL-7.||.||||...
-        ....L---J.LJ.LJLJ..."""
+        ...........
+        .S-------7.
+        .|F-----7|.
+        .||.....||.
+        .||.....||.
+        .|L-7.F-J|.
+        .|..|.|..|.
+        .L--J.L--J.
+        ..........."""
 
 
 def part2(raw_input: str):
-    pipes = process(raw_input)
+    stack: list[Tile] = []
+    pipes: dict[tuple[int, int], Tile] = {}
 
-    max_y = len(raw_input.splitlines())
-    max_x = len(raw_input.splitlines()[0])
+    for idx_y, each_line in enumerate(raw_input.splitlines()):
+        for idx_x, each_char in enumerate(list(each_line)):
+            tile = Tile((idx_y, idx_x), each_char)
+            pipes[tile.index] = tile
 
-    loop = {}
-    non_loop = []
-    for k, v in pipes.items():
-        if v.distance is not math.inf:
-            loop[k] = v
-        else:
-            non_loop.append(v)
+            if tile.is_starting():
+                tile.update_distance(0)
+                stack.append(tile)
 
-    count_inside_loop = 0
+    previous_tile = None
+    while len(stack) != 0:
+        current_tile = stack.pop()
 
-    # https://en.wikipedia.org/wiki/Point_in_polygon
-    for tile in non_loop:
-        count_ray_intersection_incrementally = 0
-        ray_y, ray_x = tile.index[0] + 1, tile.index[1] + 1
-        while ray_y < max_y and ray_x < max_x:
-            if (ray_y, ray_x) in loop:
-                count_ray_intersection_incrementally += 1
-            ray_y += 1
-            ray_x += 1
+        already_visited_one = False
+        for each_tile_indexes in current_tile.all_possible_neighbour_tile_indexes():
+            if each_tile_indexes in pipes:
+                another_tile = pipes[each_tile_indexes]
+                if current_tile.is_valid_neighbouring_tile(another_tile):
+                    if (previous_tile and previous_tile == another_tile) or already_visited_one:
+                        continue
+                    already_visited_one = True
+                    have_updated = another_tile.update_distance(current_tile.distance + 1)
+                    if have_updated:
+                        stack.append(another_tile)
 
-        count_ray_intersection_detrimentally = 0
-        ray_y, ray_x = tile.index[0] - 1, tile.index[1] - 1
-        while ray_y >= 0 and ray_x >= 0:
-            if (ray_y, ray_x) in loop:
-                count_ray_intersection_detrimentally += 1
-            ray_y -= 1
-            ray_x -= 1
+        previous_tile = current_tile
 
-        if count_ray_intersection_incrementally % 2 == 1 and count_ray_intersection_detrimentally % 2 == 1:
-            count_inside_loop += 1
+    loop = sorted([v for k, v in pipes.items() if v.distance is not math.inf], key=lambda x: x.distance)
 
-    return count_inside_loop
+    def determinant(index_a, index_b):
+        return index_a[1] * index_b[0] - index_b[1] * index_a[0]
+
+    # https://en.wikipedia.org/wiki/Shoelace_formula
+    two_time_area = determinant(loop[-1].index, loop[0].index)
+    for i in range(len(loop) - 1):
+        two_time_area += determinant(loop[i].index, loop[i + 1].index)
+    area = two_time_area // 2
+
+    # https://en.wikipedia.org/wiki/Pick%27s_theorem
+    total_boundary_points = len(loop)
+    return abs(area) + 1 - total_boundary_points // 2
+
+
