@@ -1,5 +1,4 @@
 import logging
-import re
 from dataclasses import dataclass
 
 LOG = logging.getLogger(__name__)
@@ -7,11 +6,10 @@ LOG_LEVEL = logging.DEBUG
 DAY = 12
 DEVELOPMENT_PHASE = False
 PART_1_ENABLE = True
-PART_2_ENABLE = False
+PART_2_ENABLE = True
 
 
 def part1_example():
-
     return """\
         ???.### 1,1,3
         .??..??...?##. 1,1,3
@@ -27,7 +25,7 @@ class Information:
     contiguous_group: list[int]
 
     def arrangement(self):
-        LOG.debug(self)
+        dp = {}
 
         def find_arrangement(condition_idx=0, group_idx=0, group_count=0, prev_char=None):
             if condition_idx == len(self.spring_condition):
@@ -45,15 +43,27 @@ class Information:
                 return 0
 
             current_char = self.spring_condition[condition_idx]
+            dp_index = (condition_idx, group_idx, group_count, current_char)
+
+            if dp_index in dp:
+                return dp[dp_index]
             if current_char == '#':
                 if group_idx < len(self.contiguous_group) and group_count + 1 <= self.contiguous_group[group_idx]:
-                    return find_arrangement(condition_idx + 1, group_idx, group_count + 1, current_char)
+                    dp_value = find_arrangement(condition_idx + 1, group_idx, group_count + 1, current_char)
+                    dp[dp_index] = dp_value
+                    return dp_value
+                dp[dp_index] = 0
                 return 0
             elif current_char == '.':
                 if prev_char == '.' or prev_char is None:
-                    return find_arrangement(condition_idx + 1, group_idx, 0, current_char)
+                    dp_value = find_arrangement(condition_idx + 1, group_idx, 0, current_char)
+                    dp[dp_index] = dp_value
+                    return dp_value
                 elif group_idx < len(self.contiguous_group) and self.contiguous_group[group_idx] == group_count:
-                    return find_arrangement(condition_idx + 1, group_idx + 1, 0, current_char)
+                    dp_value = find_arrangement(condition_idx + 1, group_idx + 1, 0, current_char)
+                    dp[dp_index] = dp_value
+                    return dp_value
+                dp[dp_index] = 0
                 return 0
             else:  # Char is `?`
                 # Lets say its a `#`
@@ -65,6 +75,7 @@ class Information:
                     permutation += find_arrangement(condition_idx + 1, group_idx, 0, '.')
                 elif group_idx < len(self.contiguous_group) and self.contiguous_group[group_idx] == group_count:
                     permutation += find_arrangement(condition_idx + 1, group_idx + 1, 0, '.')
+                dp[dp_index] = permutation
                 return permutation
 
         return find_arrangement()
@@ -86,11 +97,17 @@ def part1(raw_input: str):
 
 
 def part2_example():
-    return """\
-        multi
-        line
-        input"""
+    return part1_example()
 
 
 def part2(raw_input: str):
-    pass
+    sum_of_permutations = 0
+    for each_line in raw_input.splitlines():
+        line_split = each_line.split(' ')
+        contiguous_group = list(map(int, line_split[1].split(','))) * 5
+        spring_condition = '?'.join([line_split[0]] * 5)
+
+        info = Information(spring_condition, contiguous_group)
+        sum_of_permutations += info.arrangement()
+
+    return sum_of_permutations
