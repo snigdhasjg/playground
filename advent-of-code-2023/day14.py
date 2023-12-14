@@ -1,10 +1,10 @@
 import logging
 
 LOG = logging.getLogger(__name__)
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.CRITICAL
 DAY = 14
-DEVELOPMENT_PHASE = True
-PART_1_ENABLE = False
+DEVELOPMENT_PHASE = False
+PART_1_ENABLE = True
 PART_2_ENABLE = True
 
 
@@ -77,5 +77,125 @@ def part2_example():
         #OO..#...."""
 
 
+class Panel:
+    def __init__(self, raw_input):
+        self.platform = list(map(list, raw_input.splitlines()))
+        self.x_len = len(self.platform[0])
+        self.y_len = len(self.platform)
+
+        LOG.debug(self)
+
+    def __hash__(self):
+        return hash(repr(self))
+
+    def load(self):
+        total_sum = 0
+        for x in range(self.x_len):
+            line_sum = 0
+            for y in range(self.y_len):
+                if self.platform[y][x] == 'O':
+                    line_sum += self.y_len - y
+            total_sum += line_sum
+
+        return total_sum
+
+    def cycle(self):
+        def north():
+            LOG.debug('\nTilting north')
+            for x in range(self.x_len):
+                last_empty_space = -1
+                for y in range(self.y_len):
+                    current_value = self.platform[y][x]
+                    if last_empty_space == -1:
+                        if current_value == '.':
+                            last_empty_space = y
+                    elif current_value == 'O':
+                        self.platform[last_empty_space][x] = 'O'
+                        self.platform[y][x] = '.'
+                        last_empty_space += 1
+                    elif current_value == '#':
+                        last_empty_space = -1
+            LOG.debug(self)
+
+        def south():
+            LOG.debug('\nTilting south')
+            for x in range(self.x_len):
+                last_empty_space = -1
+                for y in range(self.y_len - 1, -1, -1):
+                    current_value = self.platform[y][x]
+                    if last_empty_space == -1:
+                        if current_value == '.':
+                            last_empty_space = y
+                    elif current_value == 'O':
+                        self.platform[last_empty_space][x] = 'O'
+                        self.platform[y][x] = '.'
+                        last_empty_space -= 1
+                    elif current_value == '#':
+                        last_empty_space = -1
+            LOG.debug(self)
+
+        def west():
+            LOG.debug('\nTilting west')
+            for y in range(self.y_len):
+                last_empty_space = -1
+                for x in range(self.x_len):
+                    current_value = self.platform[y][x]
+                    if last_empty_space == -1:
+                        if current_value == '.':
+                            last_empty_space = x
+                    elif current_value == 'O':
+                        self.platform[y][last_empty_space] = 'O'
+                        self.platform[y][x] = '.'
+                        last_empty_space += 1
+                    elif current_value == '#':
+                        last_empty_space = -1
+            LOG.debug(self)
+
+        def east():
+            LOG.debug('\nTilting east')
+            for y in range(self.y_len):
+                last_empty_space = -1
+                for x in range(self.x_len - 1, -1, -1):
+                    current_value = self.platform[y][x]
+                    if last_empty_space == -1:
+                        if current_value == '.':
+                            last_empty_space = x
+                    elif current_value == 'O':
+                        self.platform[y][last_empty_space] = 'O'
+                        self.platform[y][x] = '.'
+                        last_empty_space -= 1
+                    elif current_value == '#':
+                        last_empty_space = -1
+            LOG.debug(self)
+
+        north()
+        west()
+        south()
+        east()
+
+        LOG.debug('\nPost cycle')
+        LOG.debug(self)
+
+    def __repr__(self):
+        return '\n'.join(map(lambda x: ''.join(x), self.platform))
+
+
 def part2(raw_input: str):
-    pass
+    panel = Panel(raw_input)
+    hashes = {hash(panel): 0}
+    loads = []
+
+    match = (0, 0)
+    for i in range(1, 1000000001):
+        panel.cycle()
+        panel_hash = hash(panel)
+        loads.append(panel.load())
+        if panel_hash in hashes:
+            match = (hashes[panel_hash], i)
+            LOG.debug(f'Found cycle at {i} matches with {hashes[panel_hash]}')
+            break
+        hashes[panel_hash] = i
+
+    cycle_length = match[1] - match[0]
+    mod_value = (1000000000 - match[0]) % cycle_length
+    return loads[match[0] + mod_value - 1]
