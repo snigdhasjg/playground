@@ -2,7 +2,7 @@ import logging
 import textwrap
 import os
 
-from day1 import (
+from day2 import (
     LOG_LEVEL,
     DAY,
     DEVELOPMENT_PHASE,
