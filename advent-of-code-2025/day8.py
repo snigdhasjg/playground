@@ -1,13 +1,12 @@
 import logging
-import math
 import uuid
 
 LOG = logging.getLogger(__name__)
 LOG_LEVEL = logging.DEBUG
 DAY = 8
 DEVELOPMENT_PHASE = False
-PART_1_ENABLE = True
-PART_2_ENABLE = False
+PART_1_ENABLE = False
+PART_2_ENABLE = True
 
 
 class Connection:
@@ -51,6 +50,9 @@ class JunctionBox:
             return NotImplemented
         return self.X == other.X and self.Y == other.Y and self.Z == other.Z
 
+    def circuit_size(self):
+        return len(self.connection.nodes) if self.connection else 1
+
     def distance(self, another: 'JunctionBox'):
         squared = (self.X - another.X) ** 2 + (self.Y - another.Y) ** 2 + (self.Z - another.Z) ** 2
         return squared
@@ -66,8 +68,7 @@ class JunctionBox:
             LOG.debug("Creating new connection %s", new_connection)
         elif self.connection and another.connection:
             if self.connection.id == another.connection.id:
-                # LOG.debug("Already same connection %s, so skipping", self.connection)
-                return False
+                return
             old_connection = another.connection
             for each_node in another.connection.nodes:
                 self.connection.add_node(each_node)
@@ -81,8 +82,6 @@ class JunctionBox:
             self.connection = another.connection
             another.connection.add_node(self)
             LOG.debug("Found another connection %s", another.connection)
-
-        return True
 
 
 def part1_example():
@@ -112,11 +111,12 @@ def part1_example():
 
 def part1(raw_input: str, max_connection=1000):
     parsed_input = list(map(JunctionBox, raw_input.splitlines()))
+    total_length = len(parsed_input)
 
     distances = []
 
-    for i in range(len(parsed_input)):
-        for j in range(i + 1, len(parsed_input)):
+    for i in range(total_length):
+        for j in range(i + 1, total_length):
             distance = parsed_input[i].distance(parsed_input[j])
             distances.append((parsed_input[i], parsed_input[j], distance))
 
@@ -125,8 +125,7 @@ def part1(raw_input: str, max_connection=1000):
     index = 0
     for each_path in distances:
         LOG.debug("%s: %s <-> %s: %s", index, each_path[0], each_path[1], each_path[2])
-        has_connection_happened = each_path[0].make_connection(each_path[1])
-        # if has_connection_happened:
+        each_path[0].make_connection(each_path[1])
         index += 1
         if index >= max_connection:
             break
@@ -146,11 +145,49 @@ def part1(raw_input: str, max_connection=1000):
 
 
 def part2_example():
+    # return ""
     return """\
-        multi
-        line
-        input"""
+        162,817,812
+        57,618,57
+        906,360,560
+        592,479,940
+        352,342,300
+        466,668,158
+        542,29,236
+        431,825,988
+        739,650,466
+        52,470,668
+        216,146,977
+        819,987,18
+        117,168,530
+        805,96,715
+        346,949,466
+        970,615,88
+        941,993,340
+        862,61,35
+        984,92,344
+        425,690,689"""
 
 
 def part2(raw_input: str):
-    pass
+    parsed_input = list(map(JunctionBox, raw_input.splitlines()))
+    total_length = len(parsed_input)
+
+    distances = []
+
+    for i in range(total_length):
+        for j in range(i + 1, total_length):
+            distance = parsed_input[i].distance(parsed_input[j])
+            distances.append((parsed_input[i], parsed_input[j], distance))
+
+    distances = sorted(distances, key=lambda x: x[2])
+    LOG.debug("Total size of pairs: %s", len(distances))
+    index = 0
+    for each_path in distances:
+        LOG.debug("%s: %s <-> %s: %s", index, each_path[0], each_path[1], each_path[2])
+        each_path[0].make_connection(each_path[1])
+        if each_path[0].circuit_size() == total_length:
+            return each_path[0].X * each_path[1].X
+        index += 1
+
+    return None
